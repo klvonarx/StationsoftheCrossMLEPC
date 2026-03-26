@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scriptural Stations of the Cross</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --gold: #b8973a;
+    --crimson: #8b1a1a;
+    --bg: #faf8f4;
+    --surface: #ffffff;
+    --text: #1c1410;
+    --text-sec: #5a4a3a;
+    --text-ter: #9a8a7a;
+    --border: rgba(90,74,58,0.15);
+    --border-med: rgba(90,74,58,0.28);
+    --bg-sec: #f5f0e8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1410;
+      --surface: #221e18;
+      --text: #ede8df;
+      --text-sec: #b0a090;
+      --text-ter: #7a6a5a;
+      --border: rgba(200,180,150,0.12);
+      --border-med: rgba(200,180,150,0.22);
+      --bg-sec: #2a241c;
+    }
+  }
+  body { background: var(--bg); color: var(--text); font-family: 'Cormorant Garamond', Georgia, serif; min-height: 100vh; }
+  #app { max-width: 680px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+  .intro-section { padding-bottom: 1.25rem; border-bottom: 0.5px solid var(--border); margin-bottom: 1.75rem; }
+  .intro-section h1 { font-family: 'Cinzel', serif; font-size: 24px; font-weight: 500; letter-spacing: 0.04em; margin-bottom: 5px; }
+  .subtitle { font-size: 16px; color: var(--text-sec); font-style: italic; }
+  .source-note { font-size: 12px; color: var(--text-ter); margin-top: 6px; font-family: 'Cinzel', serif; letter-spacing: 0.04em; }
+  .history-tabs { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
+  .hist-tab { font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 0.06em; padding: 7px 15px; border-radius: 8px; border: 0.5px solid var(--border); background: none; color: var(--text-sec); cursor: pointer; transition: all 0.2s; font-weight: 400; }
+  .hist-tab.active { background: var(--bg-sec); border-color: var(--border-med); color: var(--text); }
+  .hist-panel { display: none; }
+  .hist-panel.active { display: block; }
+  .intro-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
+  .intro-card h2 { font-family: 'Cinzel', serif; font-size: 16px; font-weight: 500; margin-bottom: 0.875rem; letter-spacing: 0.03em; }
+  .intro-card p { font-size: 15.5px; line-height: 1.78; color: var(--text-sec); margin-bottom: 0.875rem; }
+  .intro-card p:last-child { margin-bottom: 0; }
+  .tag-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 0.875rem; }
+  .tag { font-size: 11px; padding: 3px 10px; border-radius: 8px; background: var(--bg-sec); color: var(--text-sec); font-family: 'Cinzel', serif; letter-spacing: 0.05em; border: 0.5px solid var(--border); }
+  .start-btn { font-family: 'Cinzel', serif; font-size: 14px; letter-spacing: 0.08em; padding: 13px 28px; border-radius: 8px; border: 0.5px solid var(--border-med); background: var(--surface); color: var(--text); cursor: pointer; transition: all 0.2s; display: block; width: 100%; font-weight: 400; margin-top: 1.25rem; }
+  .start-btn:hover { background: var(--bg-sec); }
+  .progress-bar-container { margin: 0 0 1.5rem; }
+  .progress-track { height: 3px; background: var(--border); border-radius: 2px; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #8b1a1a, #b8973a); border-radius: 2px; transition: width 0.6s ease; }
+  .progress-dots { display: flex; justify-content: space-between; margin-top: 10px; }
+  .progress-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border-med); cursor: pointer; transition: background 0.3s, transform 0.2s; flex-shrink: 0; }
+  .progress-dot.visited { background: var(--crimson); opacity: 0.5; }
+  .progress-dot.current { background: var(--gold); transform: scale(1.5); }
+  .station-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 12px; padding: 1.75rem; transition: opacity 0.4s, transform 0.4s; }
+  .station-header { display: flex; align-items: flex-start; gap: 1.25rem; margin-bottom: 1.25rem; }
+  .station-numeral { font-family: 'Cinzel', serif; font-size: 36px; font-weight: 400; color: var(--crimson); line-height: 1; min-width: 48px; text-align: center; opacity: 0.8; padding-top: 4px; }
+  .station-title { font-family: 'Cinzel', serif; font-size: 18px; font-weight: 500; margin-bottom: 4px; letter-spacing: 0.02em; line-height: 1.3; }
+  .station-number { font-size: 13px; color: var(--text-ter); font-style: italic; }
+  .divider { width: 36px; height: 1px; background: var(--gold); margin: 1.25rem 0; opacity: 0.5; }
+  .acclamation-box { background: var(--bg-sec); border: 0.5px solid var(--border); border-radius: 8px; padding: 0.875rem 1.125rem; margin-bottom: 1.25rem; font-size: 14.5px; color: var(--text-sec); }
+  .role { font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 0.07em; color: var(--text-ter); margin-bottom: 4px; }
+  .response { margin-top: 10px; padding-top: 10px; border-top: 0.5px solid var(--border); }
+  .scripture-block { background: var(--bg-sec); border-left: 2px solid var(--crimson); border-radius: 0 8px 8px 0; padding: 0.875rem 1.125rem; margin-bottom: 1.25rem; font-size: 15.5px; line-height: 1.78; font-style: italic; color: var(--text-sec); }
+  .scripture-ref { font-size: 12px; color: var(--text-ter); margin-top: 8px; font-style: normal; font-family: 'Cinzel', serif; letter-spacing: 0.04em; }
+  .reflection-text { font-size: 16.5px; line-height: 1.78; color: var(--text); margin-bottom: 1.25rem; }
+  .question-label { font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 0.1em; color: var(--text-ter); margin-bottom: 0.5rem; }
+  .reflection-question { background: var(--bg-sec); border: 0.5px solid var(--border); border-radius: 8px; padding: 1rem 1.125rem; font-size: 15.5px; line-height: 1.7; color: var(--text-sec); font-style: italic; margin-bottom: 1.25rem; }
+  .prayer-section { border: 0.5px solid var(--border); border-radius: 8px; padding: 1rem 1.125rem; margin-bottom: 1.25rem; }
+  .prayer-toggle { font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 0.08em; color: var(--text-sec); cursor: pointer; display: flex; align-items: center; gap: 8px; background: none; border: none; padding: 0; width: 100%; text-align: left; }
+  .arrow { font-size: 10px; transition: transform 0.2s; color: var(--gold); }
+  .prayer-toggle.open .arrow { transform: rotate(90deg); }
+  .prayer-text { display: none; margin-top: 0.875rem; font-size: 15.5px; line-height: 1.78; color: var(--text-sec); font-style: italic; border-top: 0.5px solid var(--border); padding-top: 0.875rem; }
+  .prayer-text.visible { display: block; }
+  .nav-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 0.75rem; }
+  .nav-btn { background: none; border: 0.5px solid var(--border-med); border-radius: 8px; padding: 9px 18px; font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 0.06em; color: var(--text-sec); cursor: pointer; transition: all 0.2s; }
+  .nav-btn:hover { background: var(--bg-sec); color: var(--text); }
+  .nav-btn:disabled { opacity: 0.3; cursor: default; }
+  .nav-btn:disabled:hover { background: none; }
+  .nav-btn.primary { border-color: var(--border-med); color: var(--text); }
+  .station-counter { font-size: 13px; color: var(--text-ter); font-family: 'Cinzel', serif; letter-spacing: 0.04em; }
+  .completion-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 12px; padding: 2.5rem; text-align: center; }
+  .completion-card h2 { font-family: 'Cinzel', serif; font-size: 22px; font-weight: 500; margin-bottom: 1.25rem; letter-spacing: 0.04em; }
+  .completion-card p { font-size: 16.5px; line-height: 1.78; color: var(--text-sec); font-style: italic; margin-bottom: 1rem; }
+  .completion-ref { font-size: 13px; color: var(--text-ter); font-style: normal; font-family: 'Cinzel', serif; letter-spacing: 0.04em; margin-top: 0.25rem; }
+  .restart-btn { font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 0.08em; padding: 11px 26px; border-radius: 8px; border: 0.5px solid var(--border-med); background: none; color: var(--text-sec); cursor: pointer; transition: all 0.2s; margin-top: 0.75rem; }
+  .restart-btn:hover { background: var(--bg-sec); }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="intro-section">
+    <h1>Scriptural Stations of the Cross</h1>
+    <p class="subtitle">An interactive guide for prayer and reflection</p>
+    <p class="source-note">Based on the stations prayed by Pope John Paul II · USCCB</p>
+  </div>
+
+  <div id="intro-view">
+    <div class="history-tabs">
+      <button class="hist-tab active" onclick="showTab('what')">What is this form?</button>
+      <button class="hist-tab" onclick="showTab('difference')">How it differs</button>
+      <button class="hist-tab" onclick="showTab('how')">How to pray</button>
+    </div>
+    <div class="intro-card">
+      <div id="tab-what" class="hist-panel active">
+        <h2>The Scriptural Stations</h2>
+        <p>This form of the Stations of the Cross draws every station directly from the Gospels. There are no traditions or legends — only scripture. Every moment you will reflect on is something the Gospel writers recorded.</p>
+        <p>These stations were prayed publicly by Pope John Paul II on Good Friday 1991 and have become a beloved alternative to the traditional 14 stations. The USCCB presents them as a way of entering more deeply into the biblical account of Christ's passion.</p>
+        <p>They begin not at Pilate's courtyard but in the Garden of Gethsemane — with Jesus in anguish, praying alone. From there, the story unfolds exactly as the Gospels tell it.</p>
+        <div class="tag-row">
+          <span class="tag">Pope John Paul II</span>
+          <span class="tag">Gospel-Based</span>
+          <span class="tag">USCCB</span>
+          <span class="tag">Good Friday</span>
+        </div>
+      </div>
+      <div id="tab-difference" class="hist-panel">
+        <h2>How this differs from the traditional stations</h2>
+        <p>The traditional 14 stations include several moments not found in the Gospels — Jesus falling three times, Veronica wiping his face, Mary meeting him on the road. These come from later Catholic tradition and devotion, not directly from scripture.</p>
+        <p>The Scriptural Stations replace those with moments that are in the Bible but often overlooked in prayer: Jesus in Gethsemane, Judas' betrayal with a kiss, Peter's denial in the courtyard, and Jesus promising paradise to the thief hanging beside him.</p>
+        <p>The result is a version that stays tightly with the Gospel narrative — powerful for anyone who wants to walk through the Passion story as the four evangelists actually wrote it.</p>
+      </div>
+      <div id="tab-how" class="hist-panel">
+        <h2>How to pray these stations</h2>
+        <p>At each station, begin with the traditional response: <em>"We adore you, O Christ, and we bless you / Because by your holy cross you have redeemed the world."</em></p>
+        <p>Then listen to the scripture reading. Let the words land. Don't rush to the reflection — sit in the silence first. Then read the reflection, sit with the question, and pray.</p>
+        <p>After each station, the traditional closing response is: <em>"Lord Jesus, help us walk in your steps."</em></p>
+        <p>The stations close at the tomb. We pray them always knowing what comes next.</p>
+      </div>
+      <button class="start-btn" onclick="startPrayer()">Begin the Journey →</button>
+    </div>
+  </div>
+
+  <div id="prayer-view" style="display:none">
+    <div class="progress-bar-container">
+      <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+      <div class="progress-dots" id="progress-dots"></div>
+    </div>
+    <div class="station-card" id="station-card">
+      <div class="station-header">
+        <div class="station-numeral" id="st-numeral"></div>
+        <div>
+          <div class="station-title" id="st-title"></div>
+          <div class="station-number" id="st-number"></div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="acclamation-box">
+        <div class="role">Minister</div>
+        <div>We adore you, O Christ, and we bless you.</div>
+        <div class="response">
+          <div class="role">All</div>
+          <div>Because by your holy cross you have redeemed the world.</div>
+        </div>
+      </div>
+      <div class="scripture-block">
+        <div id="st-scripture"></div>
+        <div class="scripture-ref" id="st-ref"></div>
+      </div>
+      <div class="reflection-text" id="st-reflection"></div>
+      <div class="question-label">REFLECT</div>
+      <div class="reflection-question" id="st-question"></div>
+      <div class="prayer-section">
+        <button class="prayer-toggle" id="prayer-toggle" onclick="togglePrayer()">
+          <span class="arrow">▶</span>
+          <span>Prayer for this station</span>
+        </button>
+        <div class="prayer-text" id="prayer-text"></div>
+      </div>
+      <div class="acclamation-box" style="margin-bottom:1.25rem">
+        <div class="role">All</div>
+        <div style="font-style:italic">Lord Jesus, help us walk in your steps.</div>
+      </div>
+      <div class="nav-row">
+        <button class="nav-btn" id="prev-btn" onclick="navigate(-1)">← Previous</button>
+        <span class="station-counter" id="station-counter"></span>
+        <button class="nav-btn primary" id="next-btn" onclick="navigate(1)">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="completion-view" style="display:none">
+    <div class="completion-card">
+      <h2>Journey Complete</h2>
+      <p>You have walked the Scriptural Way of the Cross — every step grounded in the words of the Gospel. Take a moment of quiet before returning to the world.</p>
+      <p>"Father, into your hands I commend my spirit."</p>
+      <p class="completion-ref">Luke 23:46</p>
+      <button class="restart-btn" onclick="restart()">Walk the Stations Again</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const stations = [
+  {
+    numeral:"I", title:"Jesus in the Garden of Gethsemane", number:"First Station",
+    scripture:"Then Jesus came with them to a place called Gethsemane, and he said to his disciples, 'Sit here while I go over there and pray.' He began to feel sorrow and distress. Then he said to them, 'My soul is sorrowful even to death. Remain here and keep watch with me.' He advanced a little and fell prostrate in prayer, saying, 'My Father, if it is possible, let this cup pass from me; yet, not as I will, but as you will.'",
+    ref:"Matthew 26:36–41",
+    reflection:"Before anything else happens — before the arrest, the trial, the cross — Jesus goes to pray. Alone. In the dark. Afraid. He doesn't pretend he isn't. 'My soul is sorrowful even to death.' He brings his whole self to God, including his fear. And then, in that same breath, he surrenders: not my will, but yours.",
+    question:"When you are afraid or overwhelmed, what do you do with it? Do you bring it to God honestly — or do you hide the hard parts? What would it mean to pray the way Jesus did here?",
+    prayer:"Lord, grant us your strength and wisdom, that we may seek to follow your will in all things — even when it is not the path we would have chosen. Amen."
+  },
+  {
+    numeral:"II", title:"Jesus, Betrayed by Judas, is Arrested", number:"Second Station",
+    scripture:"Judas, one of the Twelve, arrived, accompanied by a crowd with swords and clubs. His betrayer had arranged a signal with them, saying, 'The man I shall kiss is the one; arrest him and lead him away securely.' He came and immediately went over to him and said, 'Rabbi.' And he kissed him. At this they laid hands on him and arrested him.",
+    ref:"Mark 14:43–46",
+    reflection:"The betrayal comes wrapped in friendship — a greeting, a name, a kiss. This is one of the most devastating moments in the Gospel: not an enemy's sword, but a friend's kiss. Jesus sees it coming and does not run. He lets it happen.",
+    question:"Have you ever been betrayed by someone you trusted? What did that feel like? And on the other side — have you ever let someone down who trusted you?",
+    prayer:"Lord, grant us the courage of our convictions, that our lives may faithfully reflect the good news you bring — and the honesty to own it when we fall short. Amen."
+  },
+  {
+    numeral:"III", title:"Jesus is Condemned by the Sanhedrin", number:"Third Station",
+    scripture:"They said, 'If you are the Messiah, tell us,' but he replied to them, 'If I tell you, you will not believe, and if I question, you will not respond. But from this time on the Son of Man will be seated at the right hand of the power of God.' They all asked, 'Are you then the Son of God?' He replied to them, 'You say that I am.' Then they said, 'What further need have we for testimony? We have heard it from his own mouth.'",
+    ref:"Luke 22:66–71",
+    reflection:"Jesus is asked directly: who are you? He answers truthfully. And that truth is what condemns him. The council didn't need more evidence — they needed him to be someone smaller. He refused.",
+    question:"Has telling the truth ever cost you something? Is there a situation in your life where you are tempted to stay quiet about what you believe in order to fit in or avoid conflict?",
+    prayer:"Lord, grant us your sense of righteousness, that we may never cease to work to bring about the justice of the kingdom that you promised. Amen."
+  },
+  {
+    numeral:"IV", title:"Jesus is Denied by Peter", number:"Fourth Station",
+    scripture:"One of the maids said, 'You too were with Jesus the Galilean.' But he denied it in front of everyone, saying, 'I do not know what you are talking about!' A little later the bystanders said to Peter, 'Surely you too are one of them.' At that he began to curse and to swear, 'I do not know the man.' And immediately a cock crowed. Then Peter remembered the word that Jesus had spoken. He went out and began to weep bitterly.",
+    ref:"Matthew 26:69–75",
+    reflection:"Peter — the one who said he'd die before he'd deny him — denies him three times. In one night. He hears the rooster and knows immediately what he has done. And he weeps. This is not a villain's moment. It is a deeply human one.",
+    question:"Think of a time you didn't stand up for something or someone you should have. What stopped you? Peter was restored and became the rock of the Church — what does that tell you about failure and second chances?",
+    prayer:"Lord, grant us the gift of honesty, that we may not fear to speak the truth even when it is difficult — and the grace to begin again when we fail. Amen."
+  },
+  {
+    numeral:"V", title:"Jesus is Judged by Pilate", number:"Fifth Station",
+    scripture:"Pilate questioned him, 'Are you the king of the Jews?' He said to him in reply, 'You say so.' The chief priests accused him of many things. Again Pilate questioned him, 'Have you no answer? See how many things they accuse you of.' Jesus gave him no further answer, so that Pilate was amazed. Pilate, wishing to satisfy the crowd, released Barabbas and handed Jesus over to be crucified.",
+    ref:"Mark 15:1–5, 15",
+    reflection:"Pilate knows Jesus is innocent. He says so. But he hands him over anyway — to satisfy the crowd, to keep the peace, to protect his own position. This is the oldest story: knowing what is right and choosing what is easier.",
+    question:"When have you gone along with a crowd you knew was wrong? What makes it so hard to go against the group? What would it take to be the person who speaks up?",
+    prayer:"Lord, grant us discernment, that we may see as you see and not as the world sees — and courage to act on what we know is true. Amen."
+  },
+  {
+    numeral:"VI", title:"Jesus is Scourged and Crowned with Thorns", number:"Sixth Station",
+    scripture:"Then Pilate took Jesus and had him scourged. And the soldiers wove a crown out of thorns and placed it on his head, and clothed him in a purple cloak, and they came to him and said, 'Hail, King of the Jews!' And they struck him repeatedly.",
+    ref:"John 19:1–3",
+    reflection:"The soldiers mock the very title that is true. They dress him as a king to humiliate him — and in doing so, they tell the truth accidentally. He is king. This is what cruelty does: it reveals the cruelty of the one doing it, not the unworthiness of the one receiving it.",
+    question:"Have you ever been mocked for something you genuinely believed or valued? How did you hold onto your dignity? How do you respond when you see others being mocked or humiliated?",
+    prayer:"Lord, grant us patience in times of suffering, that we may offer our lives as a sacrifice of praise — and the wisdom to know that our worth does not depend on how others treat us. Amen."
+  },
+  {
+    numeral:"VII", title:"Jesus Bears the Cross", number:"Seventh Station",
+    scripture:"They cried out, 'Take him away, take him away! Crucify him!' Pilate said to them, 'Shall I crucify your king?' The chief priests answered, 'We have no king but Caesar.' Then he handed him over to them to be crucified. So they took Jesus, and carrying the cross himself he went out to what is called the Place of the Skull.",
+    ref:"John 19:6, 15–17",
+    reflection:"He picks it up. No one forces it onto him at this moment — he carries the cross himself. This is not a man being dragged to his death. This is someone walking toward it with purpose. The cross he carries is the weight of every human wrong.",
+    question:"What is a cross you are carrying right now — something painful or exhausting that feels like it belongs to you alone? What would it mean to carry it with the kind of purpose Jesus showed here?",
+    prayer:"Lord, grant us strength of purpose, that we may faithfully bear our crosses each day — trusting that you walk the road alongside us. Amen."
+  },
+  {
+    numeral:"VIII", title:"Jesus is Helped by Simon the Cyrenian", number:"Eighth Station",
+    scripture:"They pressed into service a passer-by, Simon, a Cyrenian, who was coming in from the country, the father of Alexander and Rufus, to carry his cross.",
+    ref:"Mark 15:21",
+    reflection:"Simon didn't volunteer. He was grabbed from the crowd — a stranger, just passing by. He had no plan to be part of this story. And then suddenly he was carrying the cross of the Son of God. His sons, Alexander and Rufus, are named — which means the early Church knew them. This moment changed a family.",
+    question:"Has something ever interrupted your ordinary day and turned out to matter more than anything you had planned? Who in your life might need someone to step in and help carry their load right now?",
+    prayer:"Lord, grant us willing spirits, that we may be your instruments on earth — even when we didn't expect to be. Amen."
+  },
+  {
+    numeral:"IX", title:"Jesus Meets the Women of Jerusalem", number:"Ninth Station",
+    scripture:"A large crowd of people followed Jesus, including many women who mourned and lamented him. Jesus turned to them and said, 'Daughters of Jerusalem, do not weep for me; weep instead for yourselves and for your children, for indeed, the days are coming when people will say, Blessed are the barren.'",
+    ref:"Luke 23:27–31",
+    reflection:"Jesus is on his way to death, and he stops to speak to those weeping for him. He turns his concern outward. He sees beyond his own suffering to the suffering that is coming for this city, for this people. Even now, his gaze is on others.",
+    question:"When you are going through something hard, how difficult is it to think of others? What does it mean to you that Jesus — in the worst moment of his life — was still thinking about the people around him?",
+    prayer:"Lord, grant us gentle spirits, that we may comfort those who mourn — and the grace to look outward even in our own pain. Amen."
+  },
+  {
+    numeral:"X", title:"Jesus is Crucified", number:"Tenth Station",
+    scripture:"When they came to the place called the Skull, they crucified him and the criminals there, one on his right, the other on his left. Then Jesus said, 'Father, forgive them, they know not what they do.'",
+    ref:"Luke 23:33–34",
+    reflection:"The first words from the cross are not a curse. They are not a cry for revenge. They are a prayer — for his executioners. Not 'I forgive them,' but 'Father, forgive them.' He brings them to God. This is the radical heart of the Gospel, and it is almost impossible to take in.",
+    question:"Is there someone in your life you have not forgiven? Not necessarily someone who deserves it — but someone the unforgiveness is costing you? What would it mean to bring them to God the way Jesus does here?",
+    prayer:"Lord, grant us merciful hearts, that we may bring your reconciliation and forgiveness to all — and find in forgiving, our own healing too. Amen."
+  },
+  {
+    numeral:"XI", title:"Jesus Promises His Kingdom to the Good Thief", number:"Eleventh Station",
+    scripture:"One of the criminals hanging there said, 'Are you not the Messiah? Save yourself and us.' The other, however, rebuking him, said, 'Have you no fear of God? We have been condemned justly, but this man has done nothing criminal.' Then he said, 'Jesus, remember me when you come into your kingdom.' He replied to him, 'Amen, I say to you, today you will be with me in Paradise.'",
+    ref:"Luke 23:39–43",
+    reflection:"Two people beside Jesus in his worst hour. One mocks. One turns. The one who turns doesn't ask to be saved from the cross — he only asks to be remembered. And Jesus gives him everything. 'Today.' Not someday. Today. This is the most unlikely conversion in the Gospel — and Jesus says yes without hesitation.",
+    question:"Do you ever feel like you've gone too far, done too much, waited too long to turn back to God? What does this station say to that feeling?",
+    prayer:"Lord, grant us perseverance, that we may never stop seeking you — and trust that you will never stop turning toward us. Amen."
+  },
+  {
+    numeral:"XII", title:"Jesus Speaks to His Mother and the Beloved Disciple", number:"Twelfth Station",
+    scripture:"Standing by the cross of Jesus were his mother and his mother's sister, Mary the wife of Clopas, and Mary of Magdala. When Jesus saw his mother and the disciple there whom he loved, he said to his mother, 'Woman, behold, your son.' Then he said to the disciple, 'Behold, your mother.' And from that hour the disciple took her into his home.",
+    ref:"John 19:25–27",
+    reflection:"From the cross, Jesus looks down and takes care of his mother. He is dying, and he is making sure she will not be alone. He creates a new family — not of blood, but of love and commitment. This is what love looks like at its limit.",
+    question:"Who are the people in your life you are responsible for — who would be lost without you? And who are the people who have shown up for you in that way? Have you told them?",
+    prayer:"Lord, grant us constancy, that we may be willing to stand by those in need — and the grace to build communities of care for those who are alone. Amen."
+  },
+  {
+    numeral:"XIII", title:"Jesus Dies on the Cross", number:"Thirteenth Station",
+    scripture:"It was now about noon and darkness came over the whole land until three in the afternoon because of an eclipse of the sun. Then the veil of the temple was torn down the middle. Jesus cried out in a loud voice, 'Father, into your hands I commend my spirit'; and when he had said this he breathed his last.",
+    ref:"Luke 23:44–46",
+    reflection:"The last words of Jesus in Luke's Gospel are a prayer from Psalm 31 — a prayer of trust. 'Into your hands I commend my spirit.' Not defeat. Not despair. Surrender. The veil of the temple tears in two — the barrier between God and humanity, gone. Something has broken open.",
+    question:"What does it mean to truly commend something into God's hands — to let go of control? Is there something in your life you are holding onto that you need to surrender?",
+    prayer:"Lord, grant us trust in you, that when our time on earth is ended, our spirits may come to you without delay — and teach us that kind of trust even now. Amen."
+  },
+  {
+    numeral:"XIV", title:"Jesus is Placed in the Tomb", number:"Fourteenth Station",
+    scripture:"When it was evening, there came a rich man from Arimathea named Joseph, who was himself a disciple of Jesus. He went to Pilate and asked for the body of Jesus; then Pilate ordered it to be handed over. Taking the body, Joseph wrapped it in clean linen and laid it in his new tomb that he had hewn in the rock. Then he rolled a huge stone across the entrance to the tomb and departed.",
+    ref:"Matthew 27:57–60",
+    reflection:"Joseph of Arimathea had been a secret disciple — too afraid to be public about it. Now, when it could cost him the most, he steps forward. He goes boldly to Pilate. He takes the body and gives it dignity. Sometimes we find our courage at the end, in the quiet acts no one else will do.",
+    question:"Is there something you believe, or someone you care about, that you have been keeping quiet about? What would it look like to step forward — even now, even quietly?",
+    prayer:"Lord, grant us your compassion, that we may always provide for those in need — and the courage to act on what we believe, even when the moment feels late. Amen."
+  }
+];
+
+let current = 0, prayerOpen = false;
+
+function showTab(id) {
+  document.querySelectorAll('.hist-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.hist-panel').forEach(p => p.classList.remove('active'));
+  document.querySelector(`[onclick="showTab('${id}')"]`).classList.add('active');
+  document.getElementById(`tab-${id}`).classList.add('active');
+}
+
+function startPrayer() {
+  document.getElementById('intro-view').style.display = 'none';
+  document.getElementById('prayer-view').style.display = 'block';
+  buildDots(); renderStation(0);
+}
+
+function buildDots() {
+  const c = document.getElementById('progress-dots');
+  c.innerHTML = '';
+  stations.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'progress-dot';
+    d.onclick = () => renderStation(i);
+    c.appendChild(d);
+  });
+}
+
+function renderStation(idx) {
+  current = idx;
+  const s = stations[idx];
+  document.getElementById('st-numeral').textContent = s.numeral;
+  document.getElementById('st-title').textContent = s.title;
+  document.getElementById('st-number').textContent = s.number;
+  document.getElementById('st-scripture').textContent = s.scripture;
+  document.getElementById('st-ref').textContent = s.ref;
+  document.getElementById('st-reflection').textContent = s.reflection;
+  document.getElementById('st-question').textContent = s.question;
+  document.getElementById('prayer-text').textContent = s.prayer;
+  prayerOpen = false;
+  document.getElementById('prayer-text').classList.remove('visible');
+  document.getElementById('prayer-toggle').classList.remove('open');
+  document.getElementById('prev-btn').disabled = idx === 0;
+  document.getElementById('next-btn').textContent = idx === stations.length - 1 ? 'Complete ✓' : 'Next →';
+  document.getElementById('station-counter').textContent = `${idx + 1} / ${stations.length}`;
+  document.getElementById('progress-fill').style.width = ((idx + 1) / stations.length * 100) + '%';
+  document.querySelectorAll('.progress-dot').forEach((d, i) => {
+    d.className = 'progress-dot';
+    if (i < idx) d.classList.add('visited');
+    if (i === idx) d.classList.add('current');
+  });
+  const card = document.getElementById('station-card');
+  card.style.transition = 'none'; card.style.opacity = '0'; card.style.transform = 'translateY(8px)';
+  setTimeout(() => { card.style.transition = 'opacity 0.4s, transform 0.4s'; card.style.opacity = '1'; card.style.transform = 'translateY(0)'; }, 10);
+}
+
+function navigate(dir) {
+  const next = current + dir;
+  if (next < 0) return;
+  if (next >= stations.length) {
+    document.getElementById('prayer-view').style.display = 'none';
+    document.getElementById('completion-view').style.display = 'block';
+    return;
+  }
+  renderStation(next);
+}
+
+function togglePrayer() {
+  prayerOpen = !prayerOpen;
+  document.getElementById('prayer-text').classList.toggle('visible', prayerOpen);
+  document.getElementById('prayer-toggle').classList.toggle('open', prayerOpen);
+}
+
+function restart() {
+  current = 0;
+  document.getElementById('completion-view').style.display = 'none';
+  document.getElementById('prayer-view').style.display = 'block';
+  buildDots(); renderStation(0);
+}
+</script>
+</body>
+</html>
